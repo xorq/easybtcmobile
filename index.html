@@ -1,44 +1,24 @@
 <!DOCTYPE html>
-<!--
-	Licensed to the Apache Software Foundation (ASF) under one
-	or more contributor license agreements.  See the NOTICE file
-	distributed with this work for additional information
-	regarding copyright ownership.  The ASF licenses this file
-	to you under the Apache License, Version 2.0 (the
-	"License"); you may not use this file except in compliance
-	with the License.  You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
 
-	Unless required by applicable law or agreed to in writing,
-	software distributed under the License is distributed on an
-	"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-	 KIND, either express or implied.  See the License for the
-	specific language governing permissions and limitations
-	under the License.
--->
 <html>
 	<head>
 		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
 		<meta content="utf-8" http-equiv="encoding">
-		<!--
-		Customize this policy to fit your own app's needs. For more guidance, see:
-			https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
-		Some notes:
-			* gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
-			* https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
-			* Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
-				* Enable inline JS: add 'unsafe-inline' to default-src
-		-->
+
 		<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
 		<meta name="format-detection" content="telephone=no">
 		<meta name="msapplication-tap-highlight" content="no">
 		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
 		<title>Easy BTC Mobile</title>
+
 		<script type="text/javascript" src="bower_components/jquery/jquery.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="js/jquery.mobile.router.min.js"></script>
 		<script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
 		<script type="text/javascript" src="bower_components/underscore/underscore.js"></script>
+		<script type="text/javascript" src="js/qrcode.js"></script>
+		<link rel="stylesheet" href="css/jquery-ui.min.css" />
 		<link rel="stylesheet" href="bower_components/jquery-mobile/css/themes/default/jquery.mobile.css" />
 		<link rel="stylesheet" type="text/css" href="css/index.css" />
 		<script type="text/javascript" src="bower_components/backbone/backbone-min.js"></script>
@@ -54,12 +34,14 @@
 			<div style='left-margin:20px' class='result' id='result'>
 				<ul class="ui-listview" data-role="listview" data-type="horizontal">
 					<li class="ui-first-child ui-last-child">
-						<a <a href="#vault" data-role="button" data-transition="slide" class="btn-game-name ui-btn ui-icon-carat-r ui-btn-icon-right">Vault</a>
+						<a <a href="#vault" data-role="button" data-transition="slide" class="btn-game-name ui-btn ui-icon-carat-r ui-btn-icon-right">Vault Generator</a>
 					</li>
 				</ul>
 			</div>
 		</div>
 		<div class="vault" id="vault" data-role="page" data-theme="b" data-direction='reverse'>
+			<script type="text/javascript" src="js/warpwallet.js"></script>
+			<script type="text/javascript" src="js/bitcoinjs.min.js"></script>
 			<div class="vaultHolder" id="vaultHolder" data-role="page" data-theme="b"></div>
 
 			</div>
@@ -68,34 +50,58 @@
 	</body>
 	<div class="app" style="width:100%" data-role="page" data-theme="b" id="scripts">
 		<script type="text/template" id="vault-template">
+
 			<div data-role='header' role='banner' class='ui-header ui-bar-inherit'>
 				<a href='#index' data-transition='slide' data-direction='reverse' class='btn-back ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext' data-role='button' role='button' style='display:none'></a>
-				<a href='#indexeditor' class='btn-edit-game ui-btn-right ui-btn ui-icon-edit ui-btn-icon-notext' data-role='button' role='button' style='padding:0px; display:none'></a>
-				<h1 style='margin:0px;font-size:36px; text-align:center;' id='bus-number-index' placeholder="Bus Number">Vault</h1>
+				<a href="#popupInfo" data-rel="popup" data-transition="pop" data-theme="b" style="margin-top:10px" class="my-tooltip-btn ui-btn ui-nodisc-icon ui-btn-inline ui-icon-info ui-btn-icon-notext"></a>
+				<h2 style='margin:0px;font-size:36px; text-align:center;padding:0px;padding-top:10px;padding-bottom:10px' id='bus-number-index'>VAULT</h2>
+			</div>
+			<div data-role="popup" id="popupInfo" class="ui-content" data-theme="a" style="max-width:350px;font-family:'Arial';">
+  			<p>This tool helps you to create a <strong>Warp Address</strong></br>
+  				It outputs the same as keybase.io/warp</br>
+  				Your passphrase should be <strong>strong</strong>!</br>
+  				You can insert your email as a salt.</br>
+  				Do not only rely only on the random word generator. It should be cryptographically secure, but it is wise to diversify your sources of randomness</br>
+  				Your phone will take some time to process the key stretching, be patient!</br>
+  				</p>
 			</div>
 			<div style='left-margin:20px' class='result ' id='result'>
 				<ul class="ui-listview" data-role="listview" data-type="horizontal" style="margin-left:10px; margin-right:10px">
-					<li class="ui-first-child" style="margin-top:40px;">
-						<h1 class="" style="font-size:24px; text-align:left">1 - Passphrase</h1>
-						<input <a href="#vault" data-role="input" class="" style="font-size:18px" ></input>
-						<a href="#" data-role="button" data-icon="plus" style="font-size:10px; padding-left:35px">add a random word</a>
-						<a href="#" data-role="button" data-icon="refresh" style="font-size:10px; padding-left:35px">randomize words</a>
+					<li class="ui-first-child" style="margin-top:20px;">
+						<h1 class="label-passphrase" style="display:none; font-size:24px; text-align:left">1 - Passphrase</h1>
+						<input data-role="input" class="passphrase" placeholder="PASSPHRASE" style="font-size:18px" ></input>
+						<a href="#" class="random-word" data-role="button" data-icon="plus" style="font-size:10px; padding-left:35px">ADD A RANDOM WORD</a>
+						<a href="#" class="randomize-words" data-role="button" data-icon="refresh" style="font-size:10px; padding-left:35px">RANDOMIZE WORDS</a>
 					</li>
-					<li class="ui-last-child" style="margin-top:40px;">
-						<h1 class="" style="font-size:24px; text-align:left">2 - Salt</h1>
-						<input <a href="#vault" data-role="input" class="" style="font-size:18px"></input>
+					<li class="ui-last-child" style="margin-top:20px;">
+						<h1 class="label-salt" style="font-size:24px; text-align:left; display:none">2 - Salt</h1>
+						<input data-role="input" class="salt" style="font-size:18px" placeholder="SALT"></input>
 						<a style="display:none"></a>
 					</li>
-					<li class="ui-last-child">
-						<button>Generate</button>
+					<li class="ui-first-child" style="margin-top:30px;">
+						<a style="display:none"></a>
+						<div class="" style="width:100%">
+							<select class="flip-min" name="flip-min" id="flip-min" data-role="slider">
+								<option value="off">GENERATE</option>
+								<option value="on"></option>
+							</select>
+						</div>
 					</li>
-					<div class="" style="width:414px; height:100px">
-						<label for="flip-min" style="width:414px">Flip switch:</label>
-						<select name="flip-min" id="flip-min" data-role="slider" style="width:414px">
-							<option value="off" style="width:414px">Generate</option>
-							<option value="on" style="width:414px"></option>
-						</select>
-					</div>
+				</ul>
+				<ul class="ui-listview qrcodes" data-role="listview" data-type="horizontal" style="display:none;margin-left:10px; margin-right:10px">
+					<!--<li><Button class="save-address">Save Address</button></li>-->
+					<li><h1>Address</h1><input style='word-break:break-all' class='label-address' disabled></input></li>
+					<li class="qrcode qrcode-address">
+						<div id="qrcode-address"></div>
+					</li>
+					<li><h1>Public Key</h1><input style='word-break:break-all' class='label-pubkey' disabled></input></li>
+					<li class="qrcode qrcode-pubkey">
+						<div id="qrcode-pubkey"></div>
+					</li>
+					<li><h1>Private Key</h1><input style='word-break:break-all' class='label-pkey' disabled></input></li>
+					<li class="qrcode qrcode-pkey">
+						<div id="qrcode-pkey"></div>
+					</li>
 				</ul>
 			</div>
 		</script>
