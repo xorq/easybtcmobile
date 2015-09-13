@@ -1,4 +1,14 @@
 
+var address = Backbone.Model.extend({
+	defaults: {
+		name   : '',
+		address: '',
+		comment: ''
+	}
+})
+
+var addressBook = Backbone.Collection
+
 var randomWord = function() {
 	//return wordDB[window.crypto.getRandomValues(new Uint32Array(1))%wordDB.length];
 	//cordova.exec(function(result){console.log(result)}, null, 'cryptoHelper', 'getRandomValue', [{}]);
@@ -54,6 +64,8 @@ var VaultView = Backbone.View.extend({
 		'click .randomize-words': 'randomizeWords',
 		'click .save-address': 'saveAddress'
 	},
+	stat: '',
+
 	saveAddress: function() {
 
 		//window.localStorage.setItem('data')
@@ -122,33 +134,30 @@ var VaultView = Backbone.View.extend({
 		//} catch(err){}
 	},
 	generate: function() {
+		console.log(this.stat)
+		if ($('.flip-min').val() == 'off') {
+			if (this.stat = 'calculating') {
+				window.location.reload()
+			} else {
+				return
+			}
+		} else {
+			if (this.stat == 'calculating') {
+				console.log('returning')
+				return
+			}
+		}
+
+		if (typeof warpwallet == 'undefined'){
+			$('body').append('<script type="text/javascript" src="js/warpwallet.js"></script>\
+			<script type="text/javascript" src="js/bitcoinjs.min.js"></script>');
+		}
 
 		var master = this;
-
-		if ($('.flip-min').val() == 'off') {
-
-			return
-		} else {
-
-		}
 
 		$('.ui-slider-label', this.el).css('background-color','red');
 
 		var hook = function(pct) {
-			if ($('.flip-min').val() == 'off'){
-				def = $.Deferred();
-				var change = function(def){
-					$('.ui-slider-label').css('background-color','#252525');
-					$('.ui-slider-label').html('GENERATE');
-					def.resolve();
-				}
-				var stop = function(){
-					throw new Error("Something went badly wrong!")
-				}
-				change(def)
-				def.done(stop);
-			}
-
 			var value = (Math.floor(100 * (((pct.what == 'pbkdf2' ? 524288 : 0) + pct.i) / (524288 + 65536))) );
 			$('#progressbar').progressbar({
 				value: value
@@ -156,7 +165,9 @@ var VaultView = Backbone.View.extend({
 			$('.ui-slider-label').html(value + ' %')
 		}
 
+		this.stat = 'calculating'
 		var def = $.Deferred();
+		
 		this.model.warp(hook, $('.passphrase').val() , $('.salt').val(), def)
 		def.done(function(){
 			$('.ui-slider-label', this.el).css('background-color','default');
@@ -211,10 +222,24 @@ var Vault = Backbone.Model.extend({
 
 
 var app = {
+	activeViews:[],
 	// Application Constructor
 	initialize: function() {
 		this.bindEvents();
 	},
+
+	undelegateAll: function() {
+		_.each(this.activeViews, function(view) {
+			try {
+				view.undelegateEvents();
+				$(view.el).removeData().unbind(); 
+			} catch(err) {
+				console.log(err)
+			}
+		})
+	},
+
+
 	// Bind Event Listeners
 	//
 	// Bind any events that are required on startup. Common events are:
@@ -246,17 +271,26 @@ var app = {
 	},
 
 	vault: function(){
+		this.undelegateAll();
+		this.bindEvents();
+
 		vaultHolder = $('#vault');
 		vaultHolder.empty()	
 		var vaultModel = new Vault;
-		var vaultView = new VaultView({model:new Vault});
+		vaultView = new VaultView({model:new Vault});
 
+		this.activeViews.push( vaultView );
 		vaultView.render().$el.appendTo(vaultHolder)	
 		vaultHolder.enhanceWithin();
 	},
+
+	sign: function(){
+		
+	}
 };
 
 var router = new $.mobile.Router([
 		{ "": { handler: "index", events: "bs"} },
-		{ "#vault": { handler: "vault", events: "bs"} }
+		{ "#vault": { handler: "vault", events: "bs"} },
+		{ "#sign": { handler: "sign", events: "bs"} }
 ], app);
