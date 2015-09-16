@@ -14,11 +14,13 @@
 
 		<script type="text/javascript" src="bower_components/jquery/jquery.min.js"></script>
 		<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="cordova.js"></script>
 		<script type="text/javascript" src="js/jquery.mobile.router.min.js"></script>
 		<script type="text/javascript" src="js/jquery.mobile-1.4.5.min.js"></script>
 		<script type="text/javascript" src="bower_components/underscore/underscore.js"></script>
 		<script type="text/javascript" src="js/qrcode.js"></script>
-
+			<script type="text/javascript" src="js/warpwallet.js"></script>\
+			<script type="text/javascript" src="js/bitcoinjs.min.js"></script>
 		<link rel="stylesheet" href="css/jquery-ui.min.css" />
 		<link rel="stylesheet" href="bower_components/jquery-mobile/css/themes/default/jquery.mobile.css" />
 		<link rel="stylesheet" type="text/css" href="css/index.css" />
@@ -45,6 +47,12 @@
 		</div>
 		<div class="vault" id="vault" data-role="page" data-theme="b" data-direction='reverse'>
 			<div class="vaultHolder" id="vaultHolder" data-role="page" data-theme="b"></div>
+
+			</div>
+		</div>
+
+		<div class="sign" id="sign" data-role="page" data-theme="b" data-direction='reverse'>
+			<div class="signHolder" id="signHolder" data-role="page" data-theme="b"></div>
 
 			</div>
 		</div>
@@ -107,6 +115,30 @@
 				</ul>
 			</div>
 		</script>
+
+		<script type="text/template" id="sign-template">
+
+			<div data-role='header' role='banner' class='ui-header ui-bar-inherit'>
+				<a href='#index' data-transition='slide' style="margin-top:10px" data-direction='reverse' class='btn-back ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext' data-role='button' role='button' style='display:block'></a>
+				<a href="#popupInfo" data-rel="popup" data-transition="pop" data-theme="b" style="margin-top:10px" class="my-tooltip-btn ui-btn ui-nodisc-icon ui-btn-inline ui-icon-info ui-btn-icon-notext"></a>
+				<h2 style='margin:0px;font-size:36px; text-align:center;padding:0px;padding-top:10px;padding-bottom:10px' id='bus-number-index'>SIGNATURE</h2>
+			</div>
+			<div style='left-margin:20px' class='result ' id='result'>
+				<ul class="ui-listview" data-role="listview" data-type="horizontal" style="margin-left:10px; margin-right:10px">
+					<li class="ui-first-child" style="margin-top:20px;">
+						<a href="" data-role="button" data-transition="slide" class="btn-scan-raw-tx ui-btn ui-icon-carat-r ui-btn-icon-right">SCAN RAW TRANSACTION</a>
+					</li><%=rawTx%>
+				</ul>
+			</div>
+			<div data-role="popup" id="popupInfo" class="ui-content" data-theme="a" style="max-width:350px;font-family:'Arial';">
+  			<p>1 - Scan a transaction using this phone</br>
+  				2 - Enter your private key informations</br>
+  				3 - Scan the signed transaction with another device for pushing</br>
+  				</p>
+			</div>
+		</script>
+
 	</div>
+	
 	<script type="text/javascript" src="js/index.js"></script>
 </html>

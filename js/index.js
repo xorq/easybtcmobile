@@ -7,7 +7,7 @@ var address = Backbone.Model.extend({
 	}
 })
 
-var addressBook = Backbone.Collection
+var addressBook = Backbone.Collection;
 
 var randomWord = function() {
 	//return wordDB[window.crypto.getRandomValues(new Uint32Array(1))%wordDB.length];
@@ -51,6 +51,34 @@ var WIFToAddress = function(pkey) {
 var WIFToPubKey = function(pkey) {
 	console.log(bitcoin.ECKey.fromWIF(pkey).pub.toHex())
 	return bitcoin.ECKey.fromWIF(pkey).pub.toHex();
+};
+var WIFToPkey = function(WIF) {
+	return WIF
+	//return bitcoin.ECKey.fromWIF(WIF);
+};
+revertHash = function(s) {
+	var newHash = ''
+		for (var i = 0; i <=s.length-2; i=i+2) {
+			newHash = ((s.substring(i,i+2)) + newHash);
+		}
+	return newHash
+};
+
+var signRawTx = function(rawTx, pkey) {
+	var txh = bitcoin.Transaction.fromHex(rawTx)
+	var txb = bitcoin.TransactionBuilder.fromTransaction(txh);
+	txb.signatures = []
+	_.each(txb.tx.ins, function(data, index) {
+		txb.sign(index, pkey);
+	});
+	console.log({ 
+		'hash' : revertHash(txb.build().getHash().toString('hex')) , 
+		'raw' : txb.build().toHex() 
+	})
+	return { 
+		'hash' : revertHash(txb.build().getHash().toString('hex')) , 
+		'raw' : txb.build().toHex() 
+	}
 };
 
 var VaultView = Backbone.View.extend({
@@ -168,14 +196,89 @@ var VaultView = Backbone.View.extend({
 		this.stat = 'calculating'
 		var def = $.Deferred();
 		
-		this.model.warp(hook, $('.passphrase').val() , $('.salt').val(), def)
-		def.done(function(){
+		warp(hook, $('.passphrase').val() , $('.salt').val(), def)
+		def.done(function(wif){
 			$('.ui-slider-label', this.el).css('background-color','default');
+			master.model.set('WIF', wif);
 			master.showQRCodes();
 		})
 	}
 });
 
+var signView = Backbone.View.extend({
+	el: $('#sign'),
+	template: _.template($('#sign-template').text()),
+	events:{
+		'click .btn-scan-raw-tx' : 'scanRawTx'
+	},
+	render: function() {
+		this.$el.html(this.template(this.model.toJSON()));
+		return this;
+	},
+
+	scanRawTx: function() {
+/*
+		//this.model.set('rawTx', tx);
+		//this.model.signRawTx();
+*/
+		/*console.log(this.model.get('rawTx'))
+		this.model.set('rawTx', '010000000407e1498683bc55043cfa284e8a36ba67c300a411c4a1887bddd0c4f5e2f8775f000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff5a8507b822b2d0d7bf34330c08f73128e1950e53f9d3d1b6e60e54ed00f76514000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff097ed5361c5c488f03ee4259e18b6125f0e098300ddfa830b31c351dfa11f981000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff97a983868dda1136afb434366761d03776e1a31b8f03485ff8b341110b0594fe010000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff0280969800000000001976a914e1bece4bb44c1e51ca993f8a20e070f485b4bedd88acd07b3a01000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88ac00000000');
+		*/
+		//this.model.signRawTx();
+
+		//var tx = '0100000001db35e514ac3fb96ee4868c26a65a729a217919b43f9cc7129cc76518d75297a7020000008b4830450221009dee9e213c252be580e139d55c444889551ea9ef658aa2f3fb1c9e5c243e298602206d5894135a3bfdbf180e2b97a2ee779ef2c388602df160f2e4179e6087730beb01410407d15e34452380f57a7bbb949d14ed44696245a90936cf252a6414704902724144aabf2454bb675a63d5ba6ca91b63252ddd0511f9440bb0bc2ff487ed3f7055ffffffff0200a3e111000000001976a91438ebbd957335477b6c5997c6def0e1125ada125b88acadb8caf2050000001976a91421f422e4fdef43f09d6c516eeac8b992fef2bff288ac00000000'
+		/*var txh = bitcoin.Transaction.fromHex(tx)
+		console.log(txh)
+		var txb = bitcoin.TransactionBuilder.fromTransaction(txh);
+		*/
+		//wif = '5JCdEiMhbs1SYYPRc6ufovFZA3aju4hYVxpLipps8TcZ2Nw3k1c'
+		
+		//pkey = bitcoin.ECKey.fromWIF(wif);
+
+		//signRawTx(tx, pkey)
+		/*console.log(txb.signatures = [])
+		_.each(txb.tx.ins, function(data, index) {
+				txb.sign(index, pkey);
+			});
+
+		console.log(txb.build().toHex())
+
+		console.log(txb.signatures);
+*/
+		var master = this;
+		cordova.plugins.barcodeScanner.scan(
+			function (result) {
+				console.log(master.text);
+				master.model.set('rawTx', result.text);
+			}, 
+			function (error) {
+				alert("Scanning failed: " + error);
+			}
+		);
+	}
+});
+
+var Transaction = Backbone.Model.extend({
+	defaults:{
+		rawTx : '',
+		signedRawTx : '',
+		pkey : '',
+	},
+	signRawTx : function(){
+		var passphrase = window.prompt('insert your warp passphrase');
+		var salt = window.prompt('insert your warp salt');
+		//hook passphrase salt def
+		def = $.Deferred();
+		warp(function(){}, passphrase, salt, def);
+		def.done(function(res){
+
+			console.log(signRawTx(this.rawTx, WIFToPkey(wif)))
+		})
+		
+	},
+
+
+});
 var Vault = Backbone.Model.extend({
 	defaults: {
 		WIF: '',
@@ -195,29 +298,7 @@ var Vault = Backbone.Model.extend({
 		return WIFToAddress(this.get('WIF'))
 	},
 
-	warp: function(hook, passphrase, salt, def){
-		var master = this;
-		var saveWarp = function(res) {
-			master.set('WIF', res.private);
-			def.resolve('finshed')
-		};
-		var hook = hook || function(){console.log('.')};
-		var callback = callback || function(){console.log('finished')};
-		var params = { 
-			"N"        : 2,
-			"p"        : 1,
-			"r"        : 8,
-			"dkLen"    : 32,
-			"pbkdf2c"  : 65536
-		};
 
-		warpwallet.run({
-        passphrase: passphrase,
-        salt: salt,
-        progress_hook: hook,
-        params: params},
-        saveWarp)
-	}
 });
 
 
@@ -252,10 +333,10 @@ var app = {
 	// The scope of 'this' is the event. In order to call the 'receivedEvent'
 	// function, we must explicitly call 'app.receivedEvent(...);'
 	onDeviceReady: function() {
-		app.receivedEvent('deviceready');
+		//app.receivedEvent('deviceready');
 	},
 	// Update DOM on a Received Event
-	receivedEvent: function(id) {
+	/*receivedEvent: function(id) {
 		var parentElement = document.getElementById(id);
 		var listeningElement = parentElement.querySelector('.listening');
 		var receivedElement = parentElement.querySelector('.received');
@@ -264,10 +345,11 @@ var app = {
 		receivedElement.setAttribute('style', 'display:block;');
 
 		console.log('Received Event: ' + id);
-	},
+	},*/
 
 	index: function(){
 		
+
 	},
 
 	vault: function(){
@@ -277,7 +359,7 @@ var app = {
 		vaultHolder = $('#vault');
 		vaultHolder.empty()	
 		var vaultModel = new Vault;
-		vaultView = new VaultView({model:new Vault});
+		var vaultView = new VaultView({model:new Vault});
 
 		this.activeViews.push( vaultView );
 		vaultView.render().$el.appendTo(vaultHolder)	
@@ -285,7 +367,27 @@ var app = {
 	},
 
 	sign: function(){
+		var master = this;
+
+		this.undelegateAll();
+		this.bindEvents();
+
+		var tx = new Transaction({})
+
+		signHolder = $('#sign');
+		signHolder.empty()
+		var view = new signView({model:(tx)});
+		master.activeViews.push( view );
+
+		var render = function(){
+			view.render().$el.appendTo(signHolder)
+			signHolder.enhanceWithin();	
+		}
 		
+		render();
+
+		tx.listenTo(tx, 'change', render)
+
 	}
 };
 
@@ -294,3 +396,28 @@ var router = new $.mobile.Router([
 		{ "#vault": { handler: "vault", events: "bs"} },
 		{ "#sign": { handler: "sign", events: "bs"} }
 ], app);
+
+
+var warp = function(hook, passphrase, salt, def){
+	var master = this;
+	var saveWarp = function(res) {
+		
+		def.resolve(res.private);
+	};
+	var hook = hook || function(){console.log('.')};
+	var callback = callback || function(){console.log('finished')};
+	var params = { 
+		"N"        : 2,
+		"p"        : 1,
+		"r"        : 8,
+		"dkLen"    : 32,
+		"pbkdf2c"  : 65536
+	};
+
+	warpwallet.run({
+	passphrase: passphrase,
+	salt: salt,
+	progress_hook: hook,
+	params: params},
+	saveWarp)
+};
