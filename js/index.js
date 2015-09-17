@@ -56,6 +56,10 @@ var WIFToPkey = function(WIF) {
 	return WIF
 	//return bitcoin.ECKey.fromWIF(WIF);
 };
+var scriptToAddress = function(script) {
+	return bitcoin.Address.fromOutputScript(script).toString()
+};
+
 revertHash = function(s) {
 	var newHash = ''
 		for (var i = 0; i <=s.length-2; i=i+2) {
@@ -217,42 +221,32 @@ var signView = Backbone.View.extend({
 	},
 
 	scanRawTx: function() {
-/*
-		//this.model.set('rawTx', tx);
-		//this.model.signRawTx();
-*/
-		/*console.log(this.model.get('rawTx'))
-		this.model.set('rawTx', '010000000407e1498683bc55043cfa284e8a36ba67c300a411c4a1887bddd0c4f5e2f8775f000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff5a8507b822b2d0d7bf34330c08f73128e1950e53f9d3d1b6e60e54ed00f76514000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff097ed5361c5c488f03ee4259e18b6125f0e098300ddfa830b31c351dfa11f981000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff97a983868dda1136afb434366761d03776e1a31b8f03485ff8b341110b0594fe010000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88acffffffff0280969800000000001976a914e1bece4bb44c1e51ca993f8a20e070f485b4bedd88acd07b3a01000000001976a91405d3984a91e60d677b32145a1b5ad586da50a7ae88ac00000000');
-		*/
-		//this.model.signRawTx();
-
-		//var tx = '0100000001db35e514ac3fb96ee4868c26a65a729a217919b43f9cc7129cc76518d75297a7020000008b4830450221009dee9e213c252be580e139d55c444889551ea9ef658aa2f3fb1c9e5c243e298602206d5894135a3bfdbf180e2b97a2ee779ef2c388602df160f2e4179e6087730beb01410407d15e34452380f57a7bbb949d14ed44696245a90936cf252a6414704902724144aabf2454bb675a63d5ba6ca91b63252ddd0511f9440bb0bc2ff487ed3f7055ffffffff0200a3e111000000001976a91438ebbd957335477b6c5997c6def0e1125ada125b88acadb8caf2050000001976a91421f422e4fdef43f09d6c516eeac8b992fef2bff288ac00000000'
-		/*var txh = bitcoin.Transaction.fromHex(tx)
-		console.log(txh)
-		var txb = bitcoin.TransactionBuilder.fromTransaction(txh);
-		*/
-		//wif = '5JCdEiMhbs1SYYPRc6ufovFZA3aju4hYVxpLipps8TcZ2Nw3k1c'
-		
-		//pkey = bitcoin.ECKey.fromWIF(wif);
-
-		//signRawTx(tx, pkey)
-		/*console.log(txb.signatures = [])
-		_.each(txb.tx.ins, function(data, index) {
-				txb.sign(index, pkey);
-			});
-
-		console.log(txb.build().toHex())
-
-		console.log(txb.signatures);
-*/
 		var master = this;
 		cordova.plugins.barcodeScanner.scan(
 			function (result) {
-				console.log(master.text);
+				try {
+					console.log(result.text);
+					var txh = bitcoin.Transaction.fromHex(result.text)
+						_.each(txh.ins,function(a, b){
+							a.script.chunks=[];
+							a.script.buffer= [];
+						})
+				} catch(err) {
+					alert("QRcode doesnt seem valid, try again...");
+					return
+				}
 				master.model.set('rawTx', result.text);
+
+				var txb = bitcoin.TransactionBuilder.fromTransaction(txh);
+				$('.outputs').append('Outputs :</br>')
+				_.each(master.model.outputs(),function(a, b){
+					$('.outputs').append('<div style="padding-left:20px"> ' + a.address + ' : ' + ( a.value / 100000000 ) + '</div>')
+				})
+				$('.outputs').append('Total : ' + _.reduce(master.model.outputs(), function(a, b) { return a + b.value}, 0) / 100000000)
+
 			}, 
 			function (error) {
-				alert("Scanning failed: " + error);
+				alert("QRcode doesnt seem valid, try again...");
 			}
 		);
 	}
@@ -273,8 +267,23 @@ var Transaction = Backbone.Model.extend({
 		def.done(function(res){
 
 			console.log(signRawTx(this.rawTx, WIFToPkey(wif)))
+			console.log(this.outputs())	
 		})
-		
+
+	},
+	outputs : function() {
+		return _.map(bitcoin.Transaction.fromHex(this.get('rawTx')).outs, function(a, b){
+			return {
+				address: scriptToAddress(a.script),
+				value: a.value
+			}
+		})
+	},
+	data : function() {
+		return {
+			rawTx : this.get('rawTx'),
+			outputs : this.outputs()
+		}
 	},
 
 

@@ -125,9 +125,14 @@
 			</div>
 			<div style='left-margin:20px' class='result ' id='result'>
 				<ul class="ui-listview" data-role="listview" data-type="horizontal" style="margin-left:10px; margin-right:10px">
-					<li class="ui-first-child" style="margin-top:20px;">
-						<a href="" data-role="button" data-transition="slide" class="btn-scan-raw-tx ui-btn ui-icon-carat-r ui-btn-icon-right">SCAN RAW TRANSACTION</a>
-					</li><%=rawTx%>
+					<li class="ui-first-child" style="margin-top:20px">
+						<a href="" data-role="button" data-transition="slide" class="btn-scan-raw-tx ui-btn ui-icon-carat-r ui-btn-icon-right" style="background-color:<%=rawTx ? 'green' : 'default'%>">SCAN RAW TRANSACTION</a>
+					</li>
+					<div class="outputs">
+					</div>
+					<li class="ui-first-child" style="margin-top:20px">
+						<a href="" data-role="button" data-transition="slide" class="btn-enter-pkey ui-btn ui-icon-carat-r ui-btn-icon-right" style="background-color:<%=pkey ? 'green' : 'default'%>">ENTER PRIVATE KEY</a>
+					</li>
 				</ul>
 			</div>
 			<div data-role="popup" id="popupInfo" class="ui-content" data-theme="a" style="max-width:350px;font-family:'Arial';">
