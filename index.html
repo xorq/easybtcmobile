@@ -21,6 +21,7 @@
 		<script type="text/javascript" src="js/qrcode.js"></script>
 			<script type="text/javascript" src="js/warpwallet.js"></script>\
 			<script type="text/javascript" src="js/bitcoinjs.min.js"></script>
+			<script type="text/javascript" src="js/bitcoinjs.min2.js"></script>
 		<link rel="stylesheet" href="css/jquery-ui.min.css" />
 		<link rel="stylesheet" href="bower_components/jquery-mobile/css/themes/default/jquery.mobile.css" />
 		<link rel="stylesheet" type="text/css" href="css/index.css" />
@@ -32,7 +33,7 @@
 			<div data-role='header' role='banner' class='ui-header ui-bar-inherit'>
 				<a href='#index' data-transition='slide' data-direction='reverse' class='btn-back ui-btn-left ui-btn ui-icon-home ui-btn-icon-notext' data-role='button' role='button' style='display:none'></a>
 				<a href="#popupInfo1" data-rel="popup" data-transition="pop" data-theme="b" style="margin-top:10px" class="my-tooltip-btn ui-btn ui-nodisc-icon ui-btn-inline ui-icon-info ui-btn-icon-notext"></a>
-				<h1 style='margin:0px;font-size:22px; text-align:center;' id='bus-number-index' placeholder="Bus Number">EASY-BTC WARP TOOL</h1>
+				<h2 style='margin:0px;font-size:36px; text-align:center;padding:0px;padding-top:10px;padding-bottom:10px' id=''>WARPZOR</h2>
 			</div>
 			<div style='left-margin:20px' class='result' id='result'>
 				<ul class="ui-listview" data-role="listview" data-type="horizontal">
@@ -136,23 +137,24 @@
 						<a href="" data-role="button" data-transition="slide" class="btn-enter-pkey ui-btn ui-icon-carat-r ui-btn-icon-right" style="display:<%=rawTx ? 'block' : 'none'%>">SIGN</a>
 					</li>
 					<li class="" style="margin-top:20px">
-						<a href="" data-role="button" data-transition="slide" class="btn-push-tx ui-btn ui-icon-carat-r ui-btn-icon-right" style="display:<%=rawTx ? 'block' : 'none'%>">PUSH TO THE NETWORK</a>
+						<a href="" data-role="button" data-transition="slide" class="btn-push-tx ui-btn ui-icon-carat-r ui-btn-icon-right" style="margin-bottom:20px; display:<%=rawTx ? 'block' : 'none'%>">PUSH TO THE NETWORK</a>
 					</li>
 					<div class="pkeyAddress">
 					</div>
 					<li class="calculation ui-last-child" style="margin-top:20px; display:none">
 						<h1 href="" style="display:none; text-align:center;font-size:25px"></h1>
 					</li>
-					<li class="qrcode qrcode-address" style="display:none">
 						<div id="qrcode-transaction"></div>
-					</li>
 				</ul>
 			</div>
 			<div data-role="popup" id="popupInfo3" class="ui-content" data-theme="a" style="max-width:350px;font-family:'Arial';">
-  			<p>1 - Scan a transaction using this phone</br>
-  				2 - Enter your private key informations</br>
-  				3 - Scan the signed transaction with another device for pushing</br>
-  				</p>
+  			<p>
+	  			1 - Create a raw transaction on your computer (You can use coinb.in)</br>
+	  			2 - Display the QRCode of the raw transaction, and scan it using the button below</br>
+	  			3 - Enter your private key informations</br>
+	  			4 - The signed transaction will be show on the screen</br>
+	  			5 - Scan it with your computer for checking & pushing
+  			</p>
 			</div>
 		</script>
 
